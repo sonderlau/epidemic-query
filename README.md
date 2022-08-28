@@ -1,25 +1,21 @@
 # 疫情地区获取
 
-## 数据清洗
-
-去除重复的地区数据
-
-```sql
-delete from epidemic_data where id not in (
-    select * from (
-                  select min(id) from epidemic_data group by area_name
-                      ) as sl
-    );
-```
 
 
-将所有英文的 `()` 替换为中文的 `（）` 与官方发布渠道的信息对齐
+## 项目文件结构
 
-```sql
-update epidemic_data set area_name = replace(area_name, '(', '（');
-update epidemic_data set area_name = replace(area_name, ')', '）');
-
-```
+ ├── db
+ │   └── epidemic_data.sql ==数据库文件==
+ ├── decryption
+ │   ├── interfaceJson.json ==返回信息==
+ │   └── risk.25cebd5f.js ==混淆后的js请求==
+ ├── README.md
+ ├── request_generate.py ==构造请求==
+ ├── request_send.py ==发送请求==
+ ├── requirements.txt ==项目所需库文件==
+ ├── run.py ==运行入口==
+ └── test ==做测试用==
+     └── select.py
 
 
 
@@ -43,23 +39,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-```bash
-# 运行
-source ven/bin/activate
-
-python 
-```
-
 
 ## 配置数据库信息
 
-在 `run.py` 文件中的 14-23 行 为数据库连接配置信息
+在 `run.py` 文件中的 8-21 行 为数据库连接配置信息
+
+修改好相关配置
 
 
 
 ## 运行
 
 ```bash
+# 激活虚拟环境
+source ven/bin/activate
+
+# 运行程序
 python run.py
 ```
 
@@ -69,9 +64,11 @@ python run.py
 
 
 
-对于风险地区的获取来自于卫生健康委官方发布网站，通过解密其发送请求中的字段格式，进行自主构造之后发送模拟的请求消息。
+对于风险地区的获取来自于卫生健康委官方发布网站，通过解密其发送请求中的字段格式，进行手动构造之后发送POST请求。
 
-其核心文件为 `decrypt/risk_request.js` ，文件经过混淆处理。
+其核心文件为 `decryption/risk.25cebd5f.js` 文件经过混淆处理
+
+
 
 
 
@@ -98,19 +95,21 @@ http://103.66.32.242:8005/zwfwMovePortal/interface/interfaceJson
 ### 请求头
 
 ```
-POST /zwfwMovePortal/interface/interfaceJson HTTP/1.1
-Host: 103.66.32.242:8005
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0
-Accept: application/json, text/javascript, */*; q=0.01
-Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
-Accept-Encoding: gzip, deflate
-Content-Type: application/json; charset=utf-8
+POST http://bmfw.www.gov.cn/bjww/interface/interfaceJson
 
-Content-Length: 235
-Origin: http://bmfw.www.gov.cn
+Accept: application/json, text/plain, */*
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
+Cache-Control: no-cache
 Connection: keep-alive
-Referer: http://bmfw.www.gov.cn/
-Cache-Control: max-age=0
+Content-Length: 235
+Content-Type: application/json;charset=UTF-8
+DNT: 1
+Host: bmfw.www.gov.cn
+Origin: http://bmfw.www.gov.cn
+Pragma: no-cache
+Referer: http://bmfw.www.gov.cn/yqfxdjcx/risk.html
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
 
 x-wif-nonce: QkjjtiLM2dCratiA
 x-wif-paasid: smt-application
@@ -130,7 +129,7 @@ x-wif-timestamp: 1641621504
 
 
 
-### 数据部分
+### 请求数据
 
 ```json
 {
@@ -179,5 +178,31 @@ x-wif-timestamp: 1641621504
         }
     ]
 }
+```
+
+
+
+
+
+## 数据清洗
+
+对最初的数据做清洗，**目前数据库中是已经清洗好的**
+
+去除重复的地区数据
+
+```sql
+delete from epidemic_data where id not in (
+    select * from (
+                  select min(id) from epidemic_data group by area_name
+                      ) as sl
+    );
+```
+
+
+将所有英文的 `()` 替换为中文的 `（）` 与官方发布渠道的信息对齐
+
+```sql
+update epidemic_data set area_name = replace(area_name, '(', '（');
+update epidemic_data set area_name = replace(area_name, ')', '）');
 ```
 
