@@ -71,7 +71,7 @@ python run.py
 
 对于风险地区的获取来自于卫生健康委官方发布网站，通过解密其发送请求中的字段格式，进行自主构造之后发送模拟的请求消息。
 
-其核心文件为 `decrypt/risk_request.js` 
+其核心文件为 `decrypt/risk_request.js` ，文件经过混淆处理。
 
 
 
@@ -118,11 +118,12 @@ x-wif-signature: 4CD1350B0208C827EB16A8AB50B91F618A73B18CD8D30EC84C30FAC8A148260
 x-wif-timestamp: 1641621504
 ```
 
+关键字段：
 
 
 - `x-wif-nonce` 固定值 "QkjjtiLM2dCratiA"
 - `x-wif-paasid` 固定值 "smt-application"
-- `x-wif-signature` timestampHeader + "fTN2pfuisxTavbTuYVSsNJHetwq5bJvCQkjjtiLM2dCratiA" + timestampHeader 进行 SHA256 十六进制表示的全大写
+- `x-wif-signature` timestampHeader + "fTN2pfuisxTavbTuYVSsNJHetwq5bJvCQkjjtiLM2dCratiA" + timestampHeader 使用 SHA256 十六进制全大写表示
 - `x-wif-timestamp` timestampHeader
 
 
@@ -157,25 +158,21 @@ x-wif-timestamp: 1641621504
 
 ### 返回
 
-整体结构：
 
 ```json
 "data": {
-    // 截止更新时间
     "end_update_time": "2022-01-08 0时",
-    // 高风险 地区数量
     "hcount": 15,
-    // 中风险 地区数量
     "mcount": 82,
     
     "highlist":[
         {
             "type": "2",
-            province: "河南省",
-            city: "许昌市",
-            county: "禹州市",
-            area_name: "河南省 许昌市 禹州市",
-            communitys: [
+            "province": "河南省",
+            "city": "许昌市",
+            "county": "禹州市",
+            "area_name": "河南省 许昌市 禹州市",
+            "communitys": [
                 "火龙镇刘沟村",
                 "夏都街道办事处"
             ]
